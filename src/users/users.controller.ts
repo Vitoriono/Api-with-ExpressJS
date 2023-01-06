@@ -18,7 +18,7 @@ export class UserController extends BaseController implements IUserController {
 	}
 
 	login(req: Request, res: Response, next: NextFunction): void {
-		// this.ok(res, 'login');
+		console.log('bp');
 		next(new HTTPError(401, 'fail of autorisation', 'login'));
 	}
 
