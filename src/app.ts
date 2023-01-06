@@ -4,18 +4,19 @@ import { inject, injectable } from 'inversify';
 import { ExeptionFilter } from './errors/exeption.filter';
 import { ILogger } from './logger/logger.interface';
 import { TYPES } from './types';
-import { UserController } from './users/users.controller';
-import 'reflect-metadata';
+import { IUserController } from './users/users.interface';
+import 'reflect-metadata'
+
 
 @injectable()
 export class App {
-  server!: Server;
+  server: Server;
   app: Express;
   port: number;
  
   constructor(
     @inject(TYPES.ILogger) private logger: ILogger,
-    @inject(TYPES.UserController) private userController: UserController,
+    @inject(TYPES.IUserController) private userController: IUserController,
     @inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter,
   ) {
     this.app = express();
