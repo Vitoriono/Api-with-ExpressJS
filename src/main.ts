@@ -7,20 +7,15 @@ import { LoggerService } from './logger/logger.service';
 import { TYPES } from './types';
 import { UserController } from './users/users.controller';
 
-async function bootstrap() {
-  // const logger = new LoggerService()
-  // const app = new App(
-  //   logger, 
-  //   new UserController(logger), 
-  //   new ExeptionFilter(logger)
-  // );
 
   const appContainer = new Container();
   appContainer.bind<ILogger>(TYPES.ILogger).to(LoggerService);
   appContainer.bind<IExeptionFilter>(TYPES.ExeptionFilter).to(ExeptionFilter);
   appContainer.bind<UserController>(TYPES.UserController).to(UserController);
   appContainer.bind<App>(TYPES.Application).to(App);
-    await app.init();
-}
+  const app = appContainer.get<App>(TYPES.Application);;
+  app.init();
 
-bootstrap();
+  export { app, appContainer };
+
+
