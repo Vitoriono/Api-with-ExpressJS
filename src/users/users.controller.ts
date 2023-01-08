@@ -8,10 +8,15 @@ import { IUserController } from './users.interface';
 import 'reflect-metadata';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
+import { User } from './user.entity';
+import { IUserService } from './users.service.interface';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
-	constructor(@inject(TYPES.ILogger) private loggerService: ILogger) {
+	constructor(
+		@inject(TYPES.ILogger) private loggerService: ILogger,
+		@inject(TYPES.IUserService) private userService: IUserService,
+	) {
 		super(loggerService);
 		this.bindRoutes([
 			{ path: '/register', method: 'post', func: this.register },
@@ -24,8 +29,15 @@ export class UserController extends BaseController implements IUserController {
 		// next(new HTTPError(401, 'fail of autorisation', 'login'));
 	}
 
-	register(req: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		console.log(req.body);
-		this.ok(res, 'register');
+	async register(
+		{ body }: Request<{}, {}, UserRegisterDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const result = await this.userService.createUser(body);
+		if (!result) {
+			return next(new HTTPError(422, 'This user already exists'));
+		}
+		this.ok(res, result);
 	}
 }
