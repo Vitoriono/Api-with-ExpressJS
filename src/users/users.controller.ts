@@ -12,6 +12,8 @@ import { IUserService } from './users.service.interface';
 import { ValidateMiddleware } from '../common/validate.middleware';
 import { sign } from 'jsonwebtoken';
 import { ConfigService } from '../configs/config.service';
+import { AuthMiddleware } from '../common/auth.middleware';
+import { AuthGuard } from '../common/auth.guard';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
@@ -33,6 +35,12 @@ export class UserController extends BaseController implements IUserController {
 				method: 'post',
 				func: this.login,
 				middlewares: [new ValidateMiddleware(UserLoginDto)],
+			},
+			{
+				path: '/info',
+				method: 'get',
+				func: this.info,
+				middlewares: [new AuthGuard()],
 			},
 		]);
 	}
@@ -60,6 +68,11 @@ export class UserController extends BaseController implements IUserController {
 			return next(new HTTPError(422, 'This user already exists'));
 		}
 		this.ok(res, { email: result.email, id: result.id });
+	}
+
+	async info({ user }: Request, res: Response, next: NextFunction): Promise<void> {
+		const userInfo = await this.userService.getUserInfo(user);
+		this.ok(res, { email: userInfo?.email, id: userInfo?.id });
 	}
 
 	private signJWT(email: string, secret: string): Promise<string> {
