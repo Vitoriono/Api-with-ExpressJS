@@ -26,13 +26,25 @@ export class UserController extends BaseController implements IUserController {
 				func: this.register,
 				middlewares: [new ValidateMiddleware(UserRegisterDto)],
 			},
-			{ path: '/login', method: 'post', func: this.login },
+			{
+				path: '/login',
+				method: 'post',
+				func: this.login,
+				middlewares: [new ValidateMiddleware(UserLoginDto)],
+			},
 		]);
 	}
 
-	login(req: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): void {
-		next(console.log(req.body));
-		// next(new HTTPError(401, 'fail of autorisation', 'login'));
+	async login(
+		req: Request<{}, {}, UserLoginDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const result = await this.userService.validateUser(req.body);
+		if (!result) {
+			return next(new HTTPError(401, 'fail of autorisation', 'login'));
+		}
+		this.ok(res, {});
 	}
 
 	async register(
@@ -44,6 +56,6 @@ export class UserController extends BaseController implements IUserController {
 		if (!result) {
 			return next(new HTTPError(422, 'This user already exists'));
 		}
-		this.ok(res, result);
+		this.ok(res, { email: result.email, id: result.id });
 	}
 }
